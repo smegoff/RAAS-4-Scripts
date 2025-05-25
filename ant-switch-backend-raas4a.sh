@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
-# ant-switch-backend-raas4a.sh
-# KiwiSDR backend for RAAS-4a antenna switch via CP2102N USB-UART
-# Compatible with Debian 11.11+, supports 4 ports and query/status
+# KiwiSDR Antenna Switch Backend: RAAS-4a
 
 N_CH=4
-VERSION=1.3
-
-# Set your serial device and baud rate here
-TTY="/dev/ttyUSB0"
-BAUD=9600  # Change to 115200 or 921600 if your board supports it
+VERSION=1.4
 
 # Try to autodetect a CP2102N device if available
+TTY="/dev/ttyUSB0"
 for path in /dev/serial/by-id/*CP2102N*; do
     [[ -e "$path" ]] && { TTY="$path"; break; }
 done
+
+BAUD=9600  # Set to 115200 or 921600 if your board supports it
 
 configure_port() {
     stty -F "$TTY" "$BAUD" cs8 -cstopb -parenb -ixon -ixoff -echo
@@ -29,7 +26,8 @@ recv_resp() {
 }
 
 AntSW_ShowBackend() {
-    echo "RAAS-4a USB v$VERSION, 4 antennas, $TTY @ $BAUD baud"
+    # Description         # NumChannels  # SerialDevice
+    echo "RAAS-4a USB relay $N_CH $TTY"
 }
 
 AntSW_GetAddress() {
@@ -87,7 +85,7 @@ AntSW_ShowSelected() {
     AntSW_ReportSelected
 }
 
-# Command-line support
+# CLI support for standalone testing
 case "${1,,}" in
     show)
         AntSW_ShowBackend
@@ -96,6 +94,6 @@ case "${1,,}" in
         AntSW_ShowSelected
         ;;
     *)
-        # No-op
+        # no-op
         ;;
 esac
