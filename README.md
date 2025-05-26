@@ -7,7 +7,7 @@ Supports manual CLI control and KiwiSDR integration for antenna selection and qu
 
 - Control up to 4 antenna ports with instant switching
 - Query currently selected port
-- Works at baud rates from 9600 up to 921600 (if supported by your RAAS-4a board)
+- Works only baud rates 9600 as this is the rate the PIC microcontroller works at.
 - Designed for Debian Linux systems (tested on Debian 11)
 
 ## Files
