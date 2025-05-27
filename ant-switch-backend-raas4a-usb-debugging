@@ -1,9 +1,11 @@
 #!/bin/bash
-# KiwiSDR Antenna Switch Backend for RAAS-4a USB (with debug and correct 'antennas' output)
+# KiwiSDR Antenna Switch Backend for RAAS-4a USB (debug logging)
 
 TTY="/dev/ttyUSB0"      # Or use /dev/serial/by-id/... for robustness
-BAUD=9600               # Your working baud rate (change if needed)
+BAUD=9600               # Your working baud rate
 EOL="\r"                # Set to "" if no EOL, "\n" for newline, "\r" for carriage return
+
+MEM="/tmp/raas4a-mem"
 
 VERSION="1.0"
 N_CH="4"
@@ -16,18 +18,32 @@ log_debug() {
 
 configure_port() {
     log_debug "configure_port called"
-    stty -F "$TTY" "$BAUD" cs8 -cstopb -parenb -ixon -ixoff -echo
+    if [ $SIM == 1 ] ; then
+        AntSW_GroundAll
+    else
+        stty -F "$TTY" "$BAUD" cs8 -cstopb -parenb -ixon -ixoff -echo
+    fi
 }
 
 send_cmd() {
     log_debug "send_cmd: $1 (EOL=${EOL@Q})"
-    printf "%s%s" "$1" "$EOL" > "$TTY"
+    if [ $SIM == 1 ] ; then
+        if [ $1 != "A?" ] ; then
+            echo -n "${1:1}" > ${MEM}
+        fi
+    else
+        printf "%s%s" "$1" "$EOL" > "$TTY"
+    fi
 }
 
 recv_resp() {
     log_debug "recv_resp called"
     sleep 0.1
-    IFS= read -r -n16 resp < "$TTY"
+    if [ $SIM == 1 ] ; then
+        resp="A"`cat ${MEM}`
+    else
+        IFS= read -r -n16 resp < "$TTY"
+    fi
     log_debug "recv_resp got: $resp"
     echo "$resp"
 }
@@ -73,7 +89,7 @@ AntSW_ReportSelected() {
     send_cmd "A?"
     reply=$(recv_resp)
     sel=${reply:1:1}
-    # CRITICAL: Output must be "Selected antennas:" (plural)
+    log_debug "AntSW_ReportSelected: reply=$reply sel=$sel"
     echo "Selected antennas: $sel"
 }
 
