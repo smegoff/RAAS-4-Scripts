@@ -1,8 +1,8 @@
 #!/bin/bash
-# KiwiSDR Antenna Switch Backend for RAAS-4a USB (debug logging)
+# KiwiSDR Antenna Switch Backend for RAAS-4a USB (with debug and correct 'antennas' output)
 
 TTY="/dev/ttyUSB0"      # Or use /dev/serial/by-id/... for robustness
-BAUD=9600               # Your working baud rate
+BAUD=9600               # Your working baud rate (change if needed)
 EOL="\r"                # Set to "" if no EOL, "\n" for newline, "\r" for carriage return
 
 VERSION="1.0"
@@ -73,8 +73,8 @@ AntSW_ReportSelected() {
     send_cmd "A?"
     reply=$(recv_resp)
     sel=${reply:1:1}
-    log_debug "AntSW_ReportSelected: reply=$reply sel=$sel"
-    echo "Selected antenna: $sel"
+    # CRITICAL: Output must be "Selected antennas:" (plural)
+    echo "Selected antennas: $sel"
 }
 
 AntSW_ShowSelected() {
